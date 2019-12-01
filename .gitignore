@@ -1,8 +1,10 @@
 .DS_Store
 .idea/
+data/
 processed_meta_data.json
 processed_Video_Games.json
 filtered_meta_data.json
+meta_Video_Games.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -43,7 +43,12 @@ def main():
         'pad',
         'adapter',
         'protect',
-        'system']
+        'system',
+        'membership',
+        'joystick',
+        'hard disk',
+        'amiibo',
+        'hard drive']
     pattern = compile_regex(stopwords)
     filename = 'data/processed_meta_data.json'
     destination = 'data/filtered_meta_data.json'
