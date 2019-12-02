@@ -3,6 +3,16 @@
 import json
 
 with open('data/processed_Video_Games.json') as json_file:
-    data = json.loads("[" +
-        json_file.read().replace("}\n{", "},\n{") +
-    "]")
+    data = json.loads(json_file.read())
+
+"""
+s = set()
+for datum in data:
+    if datum["reviewerID"] not in s:
+        s.add(datum["reviewerID"])
+print(len(s))
+"""
+
+
+
+
