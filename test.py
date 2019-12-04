@@ -42,6 +42,7 @@ for i in range(sorted_users.shape[0]):
     if sorted_users.iloc[i]["number_of_ratings"] <= 5.0:
         break
     users.add(str(sorted_users.iloc[i].name))
+print("printing number of users after truncation")
 print(len(users))
 
 print(ratings_df.sort_values('number_of_ratings', ascending=True).iloc[20000])
@@ -49,9 +50,10 @@ print(ratings_df.sort_values('number_of_ratings', ascending=True).iloc[20000])
 number_of_ratings = ratings_df.sort_values('number_of_ratings', ascending=False)
 i = 0
 for i in range(number_of_ratings.shape[0]):
-    if number_of_ratings.iloc[i]["number_of_ratings"] <= 5.0:
+    if number_of_ratings.iloc[i]["number_of_ratings"] < 100.0:
         break
     games.add(str(number_of_ratings.iloc[i].name))
+print("printing number of games after truncation")
 print(len(games))
 
 with open('data/processed_Video_Games.json') as json_file:
@@ -62,6 +64,7 @@ for datum in data:
         processed_Video_Games.append(datum)
 with open('data/test_processed_meta_data.json', 'w') as f:
     json.dump(processed_Video_Games, f)
+
 
 
 
