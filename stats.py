@@ -2,16 +2,21 @@
 # The first task is to check how many unique reviewers are there
 import json
 
-with open('data/processed_Video_Games.json') as json_file:
+with open('data/filtered_meta_data.json') as json_file:
     data = json.loads(json_file.read())
 
-"""
 s = set()
+new_data = list()
 for datum in data:
-    if datum["reviewerID"] not in s:
-        s.add(datum["reviewerID"])
-print(len(s))
-"""
+    if datum['asin'] not in s:
+        s.add(datum['asin'])
+        new_data.append(datum)
+print(len(data))
+print(len(new_data))
+with open('data/filtered_meta_data.json', 'w') as json_file:
+    json.dump(new_data, json_file)
+
+
 
 
 

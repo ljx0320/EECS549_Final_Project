@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.sparse.linalg import svds
 import insta549
+import json
 
 # Root of this application, useful if it doesn't occupy an entire domain
 APPLICATION_ROOT = '/'
@@ -35,7 +36,11 @@ def get_items_interacted(user_id, interactions_df, metadata_df):
     print(merged_items)
     return set(interacted_items)
 
-
+METADATA = {}
+with open('/Users/lijiaxin/cs/EECS549/Project/insta549/data/filtered_meta_data.json') as json_file:
+    data = json.loads(json_file.read())
+for datum in data:
+    METADATA[datum["asin"]] = datum["title"]
 METADATA_DF = pd.read_json('/Users/lijiaxin/cs/EECS549/Project/insta549/data/filtered_meta_data.json')
 RATING_DF = pd.read_json('/Users/lijiaxin/cs/EECS549/Project/insta549/data/test_processed_meta_data.json')
 
@@ -49,13 +54,25 @@ users_ids = list(users_items_pivot_matrix_df.index)
 
 # SVD
 U, sigma, Vt = svds(users_items_pivot_matrix, k=NUMBER_OF_FACTORS)
+del users_items_pivot_matrix
 sigma = np.diag(sigma)
 
 # reconstruct prediction matrix
 all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt)
+del U
+del sigma
+del Vt
 cf_preds_df = pd.DataFrame(all_user_predicted_ratings, columns=users_items_pivot_matrix_df.columns,
                            index=users_ids).transpose()
+del users_ids
 
 # initialize recommender model
 MODEL = CFRecommender(cf_preds_df, METADATA_DF)
+del cf_preds_df
+
+
+
+MERGED_DF = pd.merge(METADATA_DF, RATING_DF, on='asin')
+USER_GAMES_DF = MERGED_DF.pivot_table(index='reviewerID', columns='asin', values='rating', fill_value=0)
+del MERGED_DF
 

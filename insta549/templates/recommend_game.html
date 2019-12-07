@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Game Recommender System</title>
+</head>
+<body>
+Games that are similar to {{asin}}({{title}})
+<ul>
+{% for result in results %}
+    <li>
+    {{ result }}
+    </li>
+{% endfor %}
+</ul>
+</body>
+</html>

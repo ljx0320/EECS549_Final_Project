@@ -57,7 +57,6 @@ def main():
     # reconstruct prediction matrix
     all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt)
     cf_preds_df = pd.DataFrame(all_user_predicted_ratings, columns = users_items_pivot_matrix_df.columns, index=users_ids).transpose()
-
     # initialize recommender model
     cf_recommender_model = CFRecommender(cf_preds_df, metadata_df)
 

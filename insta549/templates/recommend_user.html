@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Game Recommender System</title>
+</head>
+<body>
+Games recommended for user {{userid}}
+<ul>
+{% for result in results %}
+    <li>
+    {{ result[2] }}
+    </li>
+{% endfor %}
+
+</ul>
+</body>
+</html>
