@@ -5,14 +5,21 @@
     <title>Video Game Recommender System</title>
 </head>
 <body>
-Games recommended for user {{userid}}
+Based on user {{userid}}'s top rated games:
+<ul>
+{% for rated_game in rated_games %}
+    <li>
+    {{ rated_game }}
+    </li>
+{% endfor %}
+</ul>
+We recommend:
 <ul>
 {% for result in results %}
     <li>
     {{ result[2] }}
     </li>
 {% endfor %}
-
 </ul>
 </body>
 </html>

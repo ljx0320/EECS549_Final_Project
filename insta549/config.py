@@ -33,8 +33,10 @@ def get_items_interacted(user_id, interactions_df, metadata_df):
     indexed_interactions_df = interactions_df.set_index('reviewerID')
     interacted_items = indexed_interactions_df.loc[user_id]['asin']
     merged_items = pd.merge(metadata_df, indexed_interactions_df.loc[user_id][['asin', 'rating']], on='asin').sort_values('rating', ascending=False)
-    print(merged_items)
-    return set(interacted_items)
+    print(merged_items['title'].values.tolist())
+    if merged_items.shape[0] >= 10:
+        return (merged_items['title'].values.tolist()[0:10], set(interacted_items))
+    return (merged_items['title'].values.tolist(), set(interacted_items))
 
 METADATA = {}
 with open('/Users/lijiaxin/cs/EECS549/Project/insta549/data/filtered_meta_data.json') as json_file:
@@ -73,6 +75,10 @@ del cf_preds_df
 
 
 MERGED_DF = pd.merge(METADATA_DF, RATING_DF, on='asin')
+
 USER_GAMES_DF = MERGED_DF.pivot_table(index='reviewerID', columns='asin', values='rating', fill_value=0)
+print(USER_GAMES_DF.shape)
+print("USER_GAMES_DF head")
+print(USER_GAMES_DF.head())
 del MERGED_DF
 

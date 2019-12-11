@@ -17,8 +17,10 @@ def get_items_interacted(user_id, interactions_df, metadata_df):
     indexed_interactions_df = interactions_df.set_index('reviewerID')
     interacted_items = indexed_interactions_df.loc[user_id]['asin']
     merged_items = pd.merge(metadata_df, indexed_interactions_df.loc[user_id][['asin', 'rating']], on='asin').sort_values('rating', ascending=False)
-    print(merged_items)
-    return set(interacted_items)
+    print(merged_items['title'].values.tolist())
+    if merged_items.shape[0] >= 10:
+        return ((merged_items['title'].values.tolist())[0:10], set(interacted_items))
+    return (merged_items['title'].values.tolist(), set(interacted_items))
 
 
 class CFRecommender:
@@ -61,7 +63,10 @@ def main():
     cf_recommender_model = CFRecommender(cf_preds_df, metadata_df)
 
     test_user = 'A1MRL66BXLXD1A'
-    print(cf_recommender_model.recommend_items(test_user, items_to_ignore=get_items_interacted(test_user, rating_df, metadata_df),verbose=True))
+    tmp, items_to_ignore = get_items_interacted(test_user, rating_df, metadata_df)
+    print("tmp")
+    print(tmp)
+    print(cf_recommender_model.recommend_items(test_user, items_to_ignore=items_to_ignore, verbose=True))
 
 if __name__ == "__main__":
     main()

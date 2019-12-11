@@ -9,11 +9,12 @@ METADATA = insta549.app.config["METADATA"]
 
 @insta549.app.route('/recommend/user/<string:userid>', methods=['GET'])
 def recommend_user(userid):
-    a = MODEL.recommend_items(userid, items_to_ignore=insta549.config.get_items_interacted(userid, RATING_DF, METADATA_DF),
-                                         verbose=True).values.tolist()
+    rated_games, games_to_ignore = insta549.config.get_items_interacted(userid, RATING_DF, METADATA_DF)
+    a = MODEL.recommend_items(userid, items_to_ignore=games_to_ignore, verbose=True).values.tolist()
     context = {}
     context['results'] = a
     context['userid'] = userid
+    context["rated_games"] = rated_games
     # return flask.jsonify(a)
     return flask.render_template("recommend_user.html", **context)
 
@@ -21,7 +22,7 @@ def recommend_user(userid):
 def recommend_game(asin):
     context = {}
     GAME_USER_RATING = USER_GAMES_DF[asin]
-    results = USER_GAMES_DF.corrwith(GAME_USER_RATING).sort_values(ascending=False).iloc[1:10].index.tolist()
+    results = USER_GAMES_DF.corrwith(GAME_USER_RATING).sort_values(ascending=False).iloc[1:11].index.tolist()
     context['asin'] = asin
     context['title'] = METADATA[asin]
     for i in range(len(results)):
