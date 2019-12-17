@@ -9,8 +9,7 @@ import random
 from scipy.sparse.linalg import svds
 from sklearn.model_selection import train_test_split
 
-
-NUMBER_OF_FACTORS = 50
+NUMBER_OF_FACTORS = 150
 EVAL_RANDOM_SAMPLE_NON_INTERACTED_ITEMS = 100
 
 # read in data
@@ -18,7 +17,7 @@ metadata_df = pd.read_json('data/filtered_meta_data.json')
 rating_df = pd.read_json('data/test_processed_meta_data.json')
 
 
-interactions_train_df, interaction_test_df = train_test_split(rating_df, test_size=0.20, random_state=42)
+interactions_train_df, interaction_test_df = train_test_split(rating_df, test_size=0.20)
 rating_indexed_df = rating_df.set_index('reviewerID')
 interactions_indexed_test_df = interaction_test_df.set_index('reviewerID')
 interactions_indexed_train_df = interactions_train_df.set_index('reviewerID')
@@ -123,17 +122,19 @@ class ModelEvaluator:
 def main():
     model_evaluator = ModelEvaluator()
     # create pivot table
-    users_items_pivot_matrix_df = interactions_train_df.pivot_table(index='reviewerID', columns='asin', values='rating', fill_value=0)
-
+    users_items_pivot_matrix_df = interactions_train_df.pivot_table(index='reviewerID', columns='asin', values='rating')
     # convert dataframe to matrix
     users_items_pivot_matrix = users_items_pivot_matrix_df.as_matrix()
-
+    games_ratings_mean = np.nanmean(users_items_pivot_matrix, axis = 0)
+    print(games_ratings_mean)
+    inds = np.where(np.isnan(users_items_pivot_matrix))
+    users_items_pivot_matrix[inds] = np.take(games_ratings_mean, inds[1])
+    print(users_items_pivot_matrix)
+    R_demeaned = users_items_pivot_matrix
     users_ids = list(users_items_pivot_matrix_df.index)
-
     # SVD
-    U, sigma, Vt = svds(users_items_pivot_matrix, k = NUMBER_OF_FACTORS)
+    U, sigma, Vt = svds(R_demeaned, k = NUMBER_OF_FACTORS)
     sigma = np.diag(sigma)
-
     # reconstruct prediction matrix
     all_user_predicted_ratings = np.dot(np.dot(U, sigma), Vt)
     cf_preds_df = pd.DataFrame(all_user_predicted_ratings, columns = users_items_pivot_matrix_df.columns, index=users_ids).transpose()
@@ -142,12 +143,40 @@ def main():
 
     # test_user = 'A1MRL66BXLXD1A'
     # print(cf_recommender_model.recommend_items(test_user, items_to_ignore=get_items_interacted(test_user, rating_df, metadata_df),verbose=True))
+    '''
+    Calculate the TOP-N accuracy
     print('Evaluating Collaborative Filtering model')
     cf_global_metrics, cf_detailed_results_df = model_evaluator.evaluate_model(cf_recommender_model)
     print('\nGlobal metrics:\n', cf_global_metrics)
     cf_detailed_results_df.head()
-    
+    '''
+
+    # Calculate the RMSE
+    print(cf_preds_df.head())
+    print(cf_preds_df.iloc[0])
+    print(interactions_indexed_test_df.head())
+    print(interactions_indexed_test_df.iloc[0])
+    print(interactions_indexed_test_df.iloc[0].name)
+    print(interactions_indexed_test_df.iloc[0].tolist())
+
+    RMSE = 0.0
+    N = 0
+    for i in range(interactions_indexed_test_df.shape[0]):
+        userid = interactions_indexed_test_df.iloc[i].name
+        asin = interactions_indexed_test_df.iloc[i].tolist()[0]
+        rating = interactions_indexed_test_df.iloc[i].tolist()[1]
+        N += 1
+        #print("user" + userid + " actual rating for " + asin + " is " + str(cf_preds_df.loc['B0002CHJA0', "A1BN8HF1K7HAZR"]))
+        #print("user" + userid + " predicted rating for " + asin + " is " + str(rating))
+        try:
+            RMSE += (cf_preds_df.loc[asin, userid] - rating) ** 2
+        except KeyError:
+            RMSE += 0
+            N -= 1
+
+    RMSE = (RMSE / N) ** 0.5
+    print("RMSE is " + str(RMSE))
+
 
 if __name__ == "__main__":
     main()
-
